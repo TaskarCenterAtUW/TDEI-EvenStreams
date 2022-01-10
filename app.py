@@ -3,26 +3,25 @@ import json
 from flask_cors import CORS
 from kafka import KafkaConsumer, KafkaProducer
 
+from configparser import ConfigParser
+from streams.streams import producer, consumer, confluent_producer, confluent_consumer
+
 app = Flask(__name__)
 
-TOPIC_NAME = "INFERENCE"
-KAFKA_SERVER = "localhost:9092"
+config_parser = ConfigParser()
+config_parser.read('getting_started.ini')
+config = dict(config_parser['default'])
 
-producer = KafkaProducer(
-    bootstrap_servers = KAFKA_SERVER,
-    api_version = (0, 11, 15)
-)
-
+delta_producer: producer.Producer = confluent_producer.ConfluentProducer('deltas', config)
 
 @app.route('/delta', methods=['POST'])
-def updateSidewalk():
+def uploadDelta():
     req = request.get_json()
     print(req)
     json_payload = json.dumps(req)
     json_payload = str.encode(json_payload)
 
-    producer.send('deltas', json_payload)
-    producer.flush()
+    # delta_producer.produce('deltas', json_payload)
     print('Sent to consumer')
     return jsonify({
         "message": "The given sidewalk information will be entered into OSW",
@@ -30,15 +29,14 @@ def updateSidewalk():
     })
 
 
-@app.route('/subgraph', methods=['POST'])
+@app.route('/delta-set', methods=['POST'])
 def createSubgraph():
     req = request.get_json()
     print(req)
     json_payload = json.dumps(req)
     json_payload = str.encode(json_payload)
 
-    producer.send('subgraphs', json_payload)
-    producer.flush()
+    delta_producer.produce(key='Austin', value=json_payload)
     print('Sent to consumer')
     return jsonify({
         "message": "The given sidewalk information will be entered into OSW",

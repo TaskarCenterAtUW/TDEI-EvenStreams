@@ -1,6 +1,7 @@
 import confluent_kafka
+from . import consumer
 
-class ConfluentProducer(Producer):
+class ConfluentConsumer(consumer.Consumer):
     def __init__(self, topic: str, config: dict):
         self.consumer = confluent_kafka.Consumer(config)
         self.topic = topic

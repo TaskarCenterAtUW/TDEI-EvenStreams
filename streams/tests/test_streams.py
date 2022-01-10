@@ -12,6 +12,11 @@ def test_streams():
     config = dict(config_parser['default'])
 
     producer: Producer = ConfluentProducer('test', config)
-    consumer: Consumer = ConfluentConsumer()
+
+    config.update(config_parser['consumer'])
+    consumer: Consumer = ConfluentConsumer('test', config)
+    
     msg = str(random.random())
     print(msg)
+
+    pass

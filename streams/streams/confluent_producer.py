@@ -1,14 +1,14 @@
 import confluent_kafka
-from ..streams.producer import Producer
+from . import producer
 
-class ConfluentProducer(Producer):
+class ConfluentProducer(producer.Producer):
     def __init__(self, topic: str, config: dict):
         self.producer = confluent_kafka.Producer(config)
         self.topic = topic
 
     def produce(self, key: str, value: str):
         self.producer.produce(self.topic, key, value,
-                callback=__delivery_callback__)
+                callback=self.__delivery_callback__)
 
         # self.producer.poll(10000)
         # self.producer.flush()
